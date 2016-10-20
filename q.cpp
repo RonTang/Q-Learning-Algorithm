@@ -40,9 +40,9 @@ int main()
 	initialize();
 
 	//Perform learning trials starting at all initial states.
-	for (int i = 0; i <= (iterations - 1); i++)
+	for (int i = 1; i <= iterations ; i++)
 	{
-		epsilon = sqrtf(1.0 / iterations);
+		epsilon = sqrtf(1.0 / i);
 		currentState = 0;
 
 		episode(currentState);
