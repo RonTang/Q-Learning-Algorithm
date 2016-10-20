@@ -7,7 +7,7 @@ using namespace std;
 const int qSize = 7;
 const double gamma = 0.8;
 float epsilon = 1;
-const int iterations = 100;
+const int iterations = 20;
 
 
 int R[qSize][qSize] =
@@ -88,7 +88,7 @@ void printQMatrix()
 
 void episode(int initialState)
 {
-	for (int i = 0; i <= (qSize - 1); i++)
+	for (int i = 0; i <= qSize * qSize; i++)
 	{
 		chooseAnAction();
 	} // i
