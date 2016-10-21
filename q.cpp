@@ -6,19 +6,21 @@ using namespace std;
 
 const int qSize = 7;
 const double gamma = 0.8;
-float epsilon = 1;
-const int iterations = 20;
-
+const double learningRate = 1;
+const int episodeStep = qSize * qSize;
+float epsilon = 0.5;
+const int iterations = 50;
+bool needLearn = true;
 
 int R[qSize][qSize] =
 {
-	{ -1, -1, -1, -1, 0, -1, -1 },
-	{ -1, -1, -1, 0, -1, 100, 0 },
-	{ -1, -1, -1, 0, -1, -1, 0 },
-	{ -1, 0, 0, -1, 0, -1, 0 },
-	{ 0, -1, -1, 0, -1, 100, 0 },
-	{ -1, 0, -1, -1, 0, -1, 0 },
-	{ -1, 0, 0, 0, 0, 100, -1 }
+	{ -1, -1, -1, -1,  0, -1,  -1 },
+	{ -1, -1, -1,  0, -1, 100,  0 },
+	{ -1, -1, -1,  0, -1, -1,   0 },
+	{ -1,  0,  0, -1,  0, -1,   0 },
+	{  0, -1, -1,  0, -1, 100,  0 },
+	{ -1,  0, -1, -1,  0, -1,   0 },
+	{ -1,  0,  0,  0,  0, 100, -1 }
 
 };
 
@@ -32,6 +34,7 @@ void initialize();
 int maximum(int state, bool returnIndexOnly);
 int reward(int action);
 void printQMatrix();
+
 int main()
 {
 
@@ -39,32 +42,42 @@ int main()
 
 	initialize();
 
-	//Perform learning trials starting at all initial states.
+	//Perform learning trials starting at  initial state 0.
 	for (int i = 1; i <= iterations ; i++)
 	{
-		epsilon = sqrtf(1.0 / i);
 		currentState = 0;
+        if(needLearn)
+        {
+            needLearn = false;
+            episode(currentState);
 
-		episode(currentState);
+        }
+        else
+        {
+            //If last episode learn nothing,decrease epsilon and continue learning.
+            epsilon = sqrtf(1.0 / i);
+            needLearn = true;
+
+        }
 
 		//printQMatrix();
 	}
 
-
+    printQMatrix();
 
 	//Perform tests, starting at all initial states.
 	for (int i = 0; i <= (qSize - 1); i++)
 	{
 		currentState = i;
 		newState = 0;
-		while (currentState != goalState) 
+		while (currentState != goalState)
 		{
 			newState = maximum(currentState, true);
 			cout << currentState << ", ";
 			currentState = newState;
 		}
 		cout << goalState << endl;
-	} // i
+	}
 
 	return 0;
 }
@@ -88,10 +101,10 @@ void printQMatrix()
 
 void episode(int initialState)
 {
-	for (int i = 0; i <= qSize * qSize; i++)
+	for (int i = 0; i <= episodeStep; i++)
 	{
 		chooseAnAction();
-	} // i
+	}
 }
 
 void chooseAnAction()
@@ -207,5 +220,8 @@ int maximum(int state, bool returnIndexOnly)
 
 int reward(int action)
 {
-	return static_cast<int>(R[currentState][action] + (gamma * maximum(action, false)));
+    int last = Q[currentState][action];
+    int cur = static_cast<int>(Q[currentState][action] + learningRate *(R[currentState][action] + gamma * maximum(action, false) - Q[currentState][action]));
+    if(cur != last) needLearn = true;
+	return  cur;
 }
